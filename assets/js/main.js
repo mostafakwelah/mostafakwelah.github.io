@@ -91,14 +91,30 @@
     lightbox.querySelector('.round-btn').focus();
     return true;
   }
+  /* projects with several videos: prev / next inside the lightbox */
+  var list = null, idx = 0;
+  var bar = lightbox && lightbox.querySelector('.lightbox__bar');
+  function setList(l) { list = l && l.length > 1 ? l : null; idx = 0; if (bar) bar.hidden = !list; }
+  function playAt(i) {
+    if (!list) return;
+    idx = (i + list.length) % list.length;
+    openVideo(list[idx][0]);
+    bar.querySelector('.lightbox__label').textContent = list[idx][1] + ' · ' + (idx + 1) + ' / ' + list.length;
+  }
+  if (bar) {
+    bar.querySelector('.lb-prev').addEventListener('click', function () { playAt(idx - 1); });
+    bar.querySelector('.lb-next').addEventListener('click', function () { playAt(idx + 1); });
+  }
   document.querySelectorAll('[data-reel]').forEach(function (el) {
     el.addEventListener('click', function (e) {
+      setList(null);
       if (SHOWREEL_VIMEO_ID && openVideo(SHOWREEL_VIMEO_ID)) e.preventDefault(); // else falls back to the Vimeo profile link
     });
   });
   document.querySelectorAll('[data-youtube]').forEach(function (el) {
     el.addEventListener('click', function (e) {
       if (e.metaKey || e.ctrlKey) return;
+      setList(null);
       var id = el.getAttribute('data-youtube'), start = el.getAttribute('data-start') || 0;
       if (openVideo(id, 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&start=' + start + '&rel=0')) e.preventDefault();
     });
@@ -106,6 +122,9 @@
   document.querySelectorAll('[data-vimeo]').forEach(function (el) {
     el.addEventListener('click', function (e) {
       if (e.metaKey || e.ctrlKey) return; // let people open Vimeo in a new tab if they want
+      var pl = el.getAttribute('data-playlist');
+      setList(pl ? pl.split(';').map(function (x) { return x.split('|'); }) : null);
+      if (list) { playAt(0); e.preventDefault(); return; }
       if (openVideo(el.getAttribute('data-vimeo'))) e.preventDefault();
     });
   });
@@ -117,7 +136,13 @@
   if (lightbox) {
     lightbox.querySelector('.round-btn').addEventListener('click', closeLightbox);
     lightbox.addEventListener('click', function (e) { if (e.target === lightbox) closeLightbox(); });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeLightbox(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeLightbox();
+      if (list && lightbox.classList.contains('is-open') && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+        var fwd = (e.key === 'ArrowRight') !== (document.documentElement.dir === 'rtl');
+        playAt(idx + (fwd ? 1 : -1));
+      }
+    });
   }
 
   /* ---------- Reveal on scroll ---------- */
