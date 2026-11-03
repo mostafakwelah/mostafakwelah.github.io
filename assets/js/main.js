@@ -1,4 +1,4 @@
-/* Mostafa Kwelah — portfolio interactions */
+/* Mostafa Kwelah: portfolio interactions */
 (function () {
   'use strict';
 
@@ -8,7 +8,7 @@
   if (reduceMotion) body.classList.add('no-motion');
 
   /* ---------- Settings you can tweak ---------- */
-  var SHOWREEL_VIMEO_ID = '';      // e.g. '123456789' — when set, "Watch the reel" opens the video in a lightbox
+  var SHOWREEL_VIMEO_ID = '';      // e.g. '123456789': when set, "Watch the reel" opens the video in a lightbox
   var BLUR_MAX = 14;               // max blur in px while scrolling fast
   var BLUR_SENSITIVITY = 5.5;      // how quickly blur builds with scroll speed
   var SKEW_MAX = 3;                // max lean in degrees
